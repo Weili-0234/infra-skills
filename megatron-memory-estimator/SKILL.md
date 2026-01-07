@@ -90,24 +90,7 @@ python scripts/estimate_from_hf.py deepseek-ai/DeepSeek-V3 \
     --tp 4 --pp 4 --ep 8 --json > result.json
 ```
 
-### validate_config.py
 
-Validate YAML configurations (legacy format):
-
-```bash
-python scripts/validate_config.py assets/my_config.yaml
-```
-
-### compare_configs.py
-
-Compare multiple configurations:
-
-```bash
-# Create variant configs and compare
-python scripts/estimate_from_hf.py deepseek-ai/DeepSeek-V3 --tp 4 --pp 4 --ep 8 --json > config1.json
-python scripts/estimate_from_hf.py deepseek-ai/DeepSeek-V3 --tp 8 --pp 2 --ep 8 --json > config2.json
-# (Then process JSON results for comparison)
-```
 
 ## Common Workflows
 
@@ -248,16 +231,7 @@ The script automatically handles:
 - **Moonlight**: Kimi models
 - **Any HuggingFace model with config.json**
 
-## Pre-configured Assets
 
-For quick reference, example YAML configs are provided in `assets/`:
-
-- `assets/base_config.yaml`: Complete template
-
-- `assets/deepseek_v3_lite.yaml`: DeepSeek-V3 lite config
-- `assets/dense_llama_7b.yaml`: LLaMA 7B config
-
-These can be used with the legacy `estimate.py` script (requires full YAML config).
 ## Setup & Troubleshooting
    
 Because this tool relies on Megatron-LM components, you need to add both the tool directory and Megatron-LM to your `PYTHONPATH`.

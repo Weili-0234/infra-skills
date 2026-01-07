@@ -41,7 +41,7 @@ from megatron.training import (
 from megatron.training.arguments import core_transformer_config_from_args
 from megatron.training.initialize import initialize_megatron
 from megatron.training.utils import get_batch_on_this_cp_rank, get_batch_on_this_tp_rank
-from megatron.training.yaml_arguments import core_transformer_config_from_yaml
+from megatron.training.utils import get_batch_on_this_cp_rank, get_batch_on_this_tp_rank
 from megatron_memory_estimator.moe_mem_estimator.base import (
     get_pipeline_model_parallel_rank,
     get_pipeline_model_parallel_world_size,
@@ -66,10 +66,7 @@ def estimate_from_config(config, args):
     args.moe_grouped_gemm = True
     patch_parallel_states()
     if config is None:
-        if args.yaml_cfg is not None:
-            config = core_transformer_config_from_yaml(args, "language_model")
-        else:
-            config = core_transformer_config_from_args(args)
+        config = core_transformer_config_from_args(args)
 
     input_shape = [args.micro_batch_size, args.seq_length]
 
@@ -265,10 +262,7 @@ def report_memory_usage(args, config=None):
     args.moe_grouped_gemm = True
     patch_parallel_states()
     if config is None:
-        if args.yaml_cfg is not None:
-            config = core_transformer_config_from_yaml(args, "language_model")
-        else:
-            config = core_transformer_config_from_args(args)
+        config = core_transformer_config_from_args(args)
 
     input_shape = [args.micro_batch_size, args.seq_length]
 
