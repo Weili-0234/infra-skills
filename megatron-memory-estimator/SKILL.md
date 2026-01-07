@@ -258,6 +258,18 @@ For quick reference, example YAML configs are provided in `assets/`:
 - `assets/dense_llama_7b.yaml`: LLaMA 7B config
 
 These can be used with the legacy `estimate.py` script (requires full YAML config).
+## Setup & Troubleshooting
+   
+Because this tool relies on Megatron-LM components, you need to add both the tool directory and Megatron-LM to your `PYTHONPATH`.
+
+**Recommended Setup:**
+
+```bash
+# Add current directory and Megatron-LM to PYTHONPATH
+export PYTHONPATH=$PYTHONPATH:$(pwd):/path/to/Megatron-LM
+```
+
+If you encounter `ImportError: No module named 'megatron_memory_estimator'`, ensure the root directory of this skill is in your `PYTHONPATH`.
 
 ## Dependencies
 
@@ -269,12 +281,12 @@ These can be used with the legacy `estimate.py` script (requires full YAML confi
 
 **Installation:**
 ```bash
-pip install mbridge transformers torch megatron-core
+pip install mbridge transformers torch megatron-core==0.13.0
 ```
 
 For full Megatron-LM support (optional):
 ```bash
-pip install git+https://github.com/NVIDIA/Megatron-LM.git
+pip install git+https://github.com/NVIDIA/Megatron-LM.git@core_r0.13.0
 ```
 
 ## Reference Documentation

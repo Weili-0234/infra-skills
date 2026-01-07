@@ -42,7 +42,7 @@ from megatron.training.arguments import core_transformer_config_from_args
 from megatron.training.initialize import initialize_megatron
 from megatron.training.utils import get_batch_on_this_cp_rank, get_batch_on_this_tp_rank
 from megatron.training.yaml_arguments import core_transformer_config_from_yaml
-from moe_mem_estimator.base import (
+from megatron_memory_estimator.moe_mem_estimator.base import (
     get_pipeline_model_parallel_rank,
     get_pipeline_model_parallel_world_size,
     get_virtual_pipeline_model_parallel_world_size,
@@ -51,8 +51,8 @@ from moe_mem_estimator.base import (
     set_global_config,
     set_pipeline_model_parallel_rank,
 )
-from moe_mem_estimator.gpt_model import GPTModel
-from moe_mem_estimator.layers import MLASelfAttention, MoELayer
+from megatron_memory_estimator.moe_mem_estimator.gpt_model import GPTModel
+from megatron_memory_estimator.moe_mem_estimator.layers import MLASelfAttention, MoELayer
 
 torch.distributed.get_rank = lambda: 0
 torch.cuda.get_device_capability = lambda: [8]

@@ -19,7 +19,7 @@ echo "Installing required packages..."
 echo
 
 # Install core dependencies
-pip install mbridge transformers torch megatron-core einops termcolor tabulate pyyaml
+pip install mbridge transformers torch megatron-core==0.13.0 einops termcolor tabulate pyyaml
 
 echo
 echo "✓ Setup complete!"
