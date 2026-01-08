@@ -13,85 +13,7 @@ Megatron supports multiple parallelism dimensions:
 
 ## Recommended Strategies by Model Size
 
-### Small Models (< 10B parameters)
-
-**Recommended:**
-- TP = 1-2
-- PP = 1
-- EP = 1 (or 2 for MoE)
-- CP = 1
-
-**Rationale:**
-- Small models fit in single GPU with optimization
-- Avoid communication overhead from excessive parallelism
-- Focus on data parallelism for throughput
-
-**Example (7B dense model on 8 GPUs):**
-```yaml
-parallelism:
-  tensor_model_parallel_size: 2
-  pipeline_model_parallel_size: 1
-  # DP = 4 (computed automatically)
-```
-
-### Medium Models (10B-50B parameters)
-
-**Recommended:**
-- TP = 4-8
-- PP = 2-4
-- EP = 2-4 (for MoE)
-- CP = 1
-
-**Rationale:**
-- Balance memory distribution with communication cost
-- Use TP for large hidden dimensions
-- Use PP for deep models
-- Use EP to split MoE experts efficiently
-
-**Example (Mixtral 8x7B on 16 GPUs):**
-```yaml
-parallelism:
-  tensor_model_parallel_size: 4
-  pipeline_model_parallel_size: 2
-  expert_model_parallel_size: 2
-  # DP = 1 (computed automatically)
-```
-
-### Large Models (50B-200B parameters)
-
-**Recommended:**
-- TP = 8
-- PP = 4-8
-- EP = 4-8 (for MoE)
-- CP = 1-2
-
-**Rationale:**
-- Maximize parallelism to fit model in memory
-- TP=8 is sweet spot (diminishing returns beyond)
-- Increase PP for very deep models
-- High EP for models with many experts
-
-**Example (DeepSeek-V3 lite on 64 GPUs):**
-```yaml
-parallelism:
-  tensor_model_parallel_size: 4
-  pipeline_model_parallel_size: 4
-  expert_model_parallel_size: 4
-  # DP = 1 (computed automatically)
-```
-
-### Very Large Models (> 200B parameters)
-
-**Recommended:**
-- TP = 8
-- PP = 8-16
-- EP = 8-16 (for MoE)
-- CP = 2-4 (for long sequences)
-
-**Rationale:**
-- Maximum parallelism needed
-- Consider 3D parallelism (TP + PP + DP)
-- High EP critical for large MoE models
+Please refer to https://github.com/ISEEKYAN/verl_megatron_practice for more details.
 
 ## Parallelism Trade-offs
 
@@ -196,7 +118,7 @@ parallelism:
 
 Run estimation:
 ```bash
-python scripts/estimate.py --config baseline.yaml
+python scripts/estimate_from_hf.py model_path --tp 1 --pp 1 --num-gpus 8
 ```
 
 If memory fits (< 80 GB for A100), done. Otherwise, continue.
@@ -205,9 +127,9 @@ If memory fits (< 80 GB for A100), done. Otherwise, continue.
 
 Increase TP incrementally:
 ```bash
-python scripts/estimate.py --config baseline.yaml --tp 2
-python scripts/estimate.py --config baseline.yaml --tp 4
-python scripts/estimate.py --config baseline.yaml --tp 8
+python scripts/estimate_from_hf.py model_path --tp 2 --num-gpus 8
+python scripts/estimate_from_hf.py model_path --tp 4 --num-gpus 8
+python scripts/estimate_from_hf.py model_path --tp 8 --num-gpus 8
 ```
 
 Stop when memory fits or TP = 8.
@@ -216,16 +138,16 @@ Stop when memory fits or TP = 8.
 
 If TP = 8 and still doesn't fit, add PP:
 ```bash
-python scripts/estimate.py --config baseline.yaml --tp 8 --pp 2
-python scripts/estimate.py --config baseline.yaml --tp 8 --pp 4
+python scripts/estimate_from_hf.py model_path --tp 8 --pp 2 --num-gpus 16
+python scripts/estimate_from_hf.py model_path --tp 8 --pp 4 --num-gpus 32
 ```
 
 ### Step 5: Add Expert Parallelism (MoE only)
 
 If MoE model and still doesn't fit, increase EP:
 ```bash
-python scripts/estimate.py --config baseline.yaml --tp 8 --pp 4 --ep 2
-python scripts/estimate.py --config baseline.yaml --tp 8 --pp 4 --ep 4
+python scripts/estimate_from_hf.py model_path --tp 8 --pp 4 --ep 2 --num-gpus 32
+python scripts/estimate_from_hf.py model_path --tp 8 --pp 4 --ep 4 --num-gpus 32
 ```
 
 ### Step 6: Enable Memory Optimizations
@@ -292,7 +214,7 @@ training:
   recompute_granularity: "full"
 ```
 
-**Result:** ~60 GB/GPU, DP = 1
+**Result:** ~60 GB/GPU, DP = 2
 
 ### Configuration 3: DeepSeek-V3 lite, 64× A100 80GB
 
@@ -308,7 +230,7 @@ training:
   recompute_granularity: "full"
 ```
 
-**Result:** ~50 GB/GPU, DP = 1
+**Result:** ~50 GB/GPU, DP = 4
 
 ## Troubleshooting
 

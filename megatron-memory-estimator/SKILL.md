@@ -196,7 +196,7 @@ Peak Memory per GPU: 40.26 GB
 **GPU Fit Guidelines:**
 - < 40 GB: A100 40GB, A100 80GB, H100
 - < 80 GB: A100 80GB, H100 80GB
-- > 80 GB: Consider more parallelism or smaller batch
+- \> 80 GB: H200 141GB or consider more parallelism or smaller batch
 
 ## Memory Optimization Techniques
 
