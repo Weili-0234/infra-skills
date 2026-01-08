@@ -184,7 +184,7 @@ Pipeline Stage 0:
 
 ================================================================================
 Peak Memory per GPU: 40.26 GB
-✓ Fits in: A100 40GB, A100 80GB, H100
+✓ Fits in: A100 80GB, H100
 ================================================================================
 ```
 
@@ -196,8 +196,7 @@ Peak Memory per GPU: 40.26 GB
 **GPU Fit Guidelines:**
 - < 40 GB: A100 40GB, A100 80GB, H100
 - < 80 GB: A100 80GB, H100 80GB
-- < 120 GB: H100 SXM 120GB
-- \> 120 GB: Consider more parallelism or smaller batch
+- > 80 GB: Consider more parallelism or smaller batch
 
 ## Memory Optimization Techniques
 
@@ -228,7 +227,6 @@ Ranked by effectiveness:
 The script automatically handles:
 
 - **DeepSeek**: DeepSeek-V2, DeepSeek-V3
-
 - **Qwen**: Qwen2.5, Qwen3 (dense and MoE)
 - **Moonlight**: Kimi models
 - **Any HuggingFace model with config.json**

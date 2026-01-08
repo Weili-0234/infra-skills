@@ -112,9 +112,22 @@ Complete reference for all configuration options in Megatron Memory Estimator.
 
 **pipeline_model_parallel_size** (required)
 - Split layers across PP stages
-- Common values: 1, 2, 4, 8
+- Common values: 1, 2, 4, 8, 16, 32
 - Best for: Deep models with many layers
 - Trade-off: Pipeline bubbles, lower GPU utilization
+- Tip: With high gradient accumulation steps, larger PP can better hide pipeline bubbles
+
+**Uneven Layer Distribution** (optional)
+
+Use these parameters when `num_layers` is not evenly divisible by PP:
+
+- **num_layers_in_first_pipeline_stage**: Specify layers in the first stage (useful when embedding layers need extra memory headroom)
+- **num_layers_in_last_pipeline_stage**: Specify layers in the last stage
+
+Example: 61 layers with PP=4
+- Option A: First stage gets 16, others get 15 (set first=16)
+- Option B: Last stage gets 16, others get 15 (set last=16)
+- Tip: Place extra layers in the last stage. **Reason**: Stage 1 faces the highest dynamic memory pressure due to activation lifespan. It must hold the first micro-batch's activations until the backward pass signal returns from the last stage (waiting for the full pipeline cycle). **Exception**: If first layers are dense (like DeepSeek-V3), their lower static parameter memory may allow for extra layers.
 
 ### Expert Parallelism (EP)
 
@@ -148,16 +161,28 @@ Complete reference for all configuration options in Megatron Memory Estimator.
 ### Parallelism Constraints
 
 **Critical constraint:**
+
+For **Attention** part:
 ```
-world_size = tp × pp × ep × etp × cp × dp
+world_size = pp × tp × cp × dp
 ```
 
-where dp (data parallelism) is computed automatically.
+For **MoE** part:
+```
+world_size = pp × ep × etp × edp
+```
 
-**Example calculation:**
+where `etp` and `edp` are the tensor parallel and data parallel sizes for experts (called `expert_tensor_parallel_size` and computed automatically, respectively).
+
+**Example calculation (Attention):**
 - world_size = 64
-- tp = 4, pp = 2, ep = 4, cp = 1, etp = 1
-- dp = 64 / (4 × 2 × 4 × 1 × 1) = 2
+- pp = 2, tp = 4, cp = 1
+- dp = 64 / (2 × 4 × 1) = 8
+
+**Example calculation (MoE):**
+- world_size = 64
+- pp = 2, ep = 4, etp = 1
+- edp = 64 / (2 × 4 × 1) = 8
 
 ## Training Section
 
