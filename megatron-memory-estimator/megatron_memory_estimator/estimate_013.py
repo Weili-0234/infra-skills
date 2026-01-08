@@ -57,10 +57,15 @@ from megatron_memory_estimator.moe_mem_estimator.layers import MLASelfAttention,
 torch.distributed.get_rank = lambda: 0
 torch.cuda.get_device_capability = lambda: [8]
 
-def estimate_from_config(config, args):
+def estimate_from_config(config, args, verbose=False):
     """
     Estimate memory usage from a given config and args, instead of global state.
     Now supports virtual pipeline model parallelism for more accurate results.
+    
+    Args:
+        config: TransformerConfig object
+        args: Arguments namespace
+        verbose: If True, print detailed per-PP-rank logs (default: False)
     """
 
     args.moe_grouped_gemm = True
@@ -72,23 +77,25 @@ def estimate_from_config(config, args):
     input_shape = [args.micro_batch_size, args.seq_length]
 
     set_global_config(config)
-    print(config)
+    # 太长了，注释掉
+    # print(config)
     # return
     cli_reports = []
 
     if config.pipeline_model_parallel_size > 1:
         for pp_rank in range(config.pipeline_model_parallel_size):
             set_pipeline_model_parallel_rank(pp_rank)
-            print(
-                f"\n------------------------------[Pipeline_Parallelism_Rank={pp_rank}]------------------------------"
-            )
+            if verbose:
+                print(
+                    f"\n------------------------------[Pipeline_Parallelism_Rank={pp_rank}]------------------------------"
+                )
             input_shape, rpt = report_memory_usage_one_pp_rank(
-                input_shape, args, config, pp_rank, config.pipeline_model_parallel_size
+                input_shape, args, config, pp_rank, config.pipeline_model_parallel_size, verbose=verbose
             )
             cli_reports.append(rpt)
     else:
         set_pipeline_model_parallel_rank(0)
-        _, rpt = report_memory_usage_one_pp_rank(input_shape, args, config)
+        _, rpt = report_memory_usage_one_pp_rank(input_shape, args, config, verbose=verbose)
         cli_reports.append(rpt)
 
     aggregated_reports: list[dict] = cli_reports
@@ -401,9 +408,10 @@ def report_memory_usage(args, config=None):
 
 
 def report_memory_usage_one_pp_rank(
-    input_shape: list[int], args, config, pp_rank=0, pp_size=1
+    input_shape: list[int], args, config, pp_rank=0, pp_size=1, verbose=False
 ) -> tuple[list[int], dict]:
-    print(f"{input_shape=}")
+    if verbose:
+        print(f"{input_shape=}")
     model: list[GPTModel] = get_model(model_provider, args, config)
     num_parameter_this_shard_all = 0
     num_parameter_this_shard_sparse_all = 0
@@ -413,7 +421,8 @@ def report_memory_usage_one_pp_rank(
         num_parameter_this_shard = one_chunk.num_parameter()
         num_activation = one_chunk.num_activation(output_shape)
         output_shape = one_chunk.mock_forward(output_shape)
-        print(f"{output_shape=}")
+        if verbose:
+            print(f"{output_shape=}")
         num_parameter_this_shard_sparse = 0
         for layer in one_chunk.decoder.layers.modules:
             if isinstance(layer.mlp, MoELayer):
@@ -454,10 +463,11 @@ def report_memory_usage_one_pp_rank(
 
         one_chunk.__repr__()
         # print(one_chunk)
-        print(
-            f"Number of parameters in every GPU in billions: "
-            f"{num_parameter_this_shard / 10**9: .2f} where mlp part is {num_parameter_this_shard_sparse / 10**9: .2f}"
-        )
+        if verbose:
+            print(
+                f"Number of parameters in every GPU in billions: "
+                f"{num_parameter_this_shard / 10**9: .2f} where mlp part is {num_parameter_this_shard_sparse / 10**9: .2f}"
+            )
         num_parameter_this_shard_all += num_parameter_this_shard
         num_parameter_this_shard_sparse_all += num_parameter_this_shard_sparse
         # recompute
@@ -508,7 +518,8 @@ def report_memory_usage_one_pp_rank(
                 num_activation += one_chunk.decoder.layers.modules[
                     0
                 ].self_attention.core_attention.num_activation()
-            print(info)
+            if verbose:
+                print(info)
 
         else:
             num_activation = (
@@ -518,16 +529,18 @@ def report_memory_usage_one_pp_rank(
         # CP
         num_activation = num_activation / config.context_parallel_size
         if pp_size == 1:
-            print(
-                f"Number of activation in every GPU in billions: "
-                f"{num_activation / 10**9: .2f} where mlp part is {num_activation_this_shard_mlp / 10**9: .2f}"
-            )
+            if verbose:
+                print(
+                    f"Number of activation in every GPU in billions: "
+                    f"{num_activation / 10**9: .2f} where mlp part is {num_activation_this_shard_mlp / 10**9: .2f}"
+                )
         else:
-            print(
-                f"Number of activation per microbatch in every GPU in billions: "
-                f"{num_activation / 10**9: .2f} where mlp part is {num_activation_this_shard_mlp / 10**9: .2f}"
-                f", {num_microbatch_this_pp_rank=} {vpp_rank=}"
-            )
+            if verbose:
+                print(
+                    f"Number of activation per microbatch in every GPU in billions: "
+                    f"{num_activation / 10**9: .2f} where mlp part is {num_activation_this_shard_mlp / 10**9: .2f}"
+                    f", {num_microbatch_this_pp_rank=} {vpp_rank=}"
+                )
         num_activation_all += num_activation
     num_bytes_per_parameter = (
         18
@@ -550,7 +563,8 @@ def report_memory_usage_one_pp_rank(
                 )
             )
         )
-        print(f"{num_bytes_per_parameter_dense=} {num_bytes_per_parameter_moe=}")
+        if verbose:
+            print(f"{num_bytes_per_parameter_dense=} {num_bytes_per_parameter_moe=}")
         weight_grad_memory = num_parameter_this_shard_all * 6 / NUM_BYTES_IN_GIGABYTE
         weight_grad_optim_memory = (
             (num_parameter_this_shard_all - num_parameter_this_shard_sparse_all)
@@ -558,7 +572,8 @@ def report_memory_usage_one_pp_rank(
             + num_parameter_this_shard_sparse_all * num_bytes_per_parameter_moe
         ) / NUM_BYTES_IN_GIGABYTE
     else:
-        print(f"{num_bytes_per_parameter=}")
+        if verbose:
+            print(f"{num_bytes_per_parameter=}")
         weight_grad_memory = num_parameter_this_shard_all * 6 / NUM_BYTES_IN_GIGABYTE
         weight_grad_optim_memory = (
             num_parameter_this_shard_all
@@ -571,10 +586,11 @@ def report_memory_usage_one_pp_rank(
     )  # only support fp16
     total_memory = weight_grad_optim_memory + activation_memory
 
-    print(
-        f"Theoretical memory footprints: weight and optimizer={weight_grad_optim_memory:.2f} GB, "
-        f"activation={activation_memory:.2f} GB, total={total_memory:.2f} GB\n"
-    )
+    if verbose:
+        print(
+            f"Theoretical memory footprints: weight and optimizer={weight_grad_optim_memory:.2f} GB, "
+            f"activation={activation_memory:.2f} GB, total={total_memory:.2f} GB\n"
+        )
 
     # 生成与 estimate_from_config 相同格式的聚合报告
     model_breakdown_concat = "\n\n".join(

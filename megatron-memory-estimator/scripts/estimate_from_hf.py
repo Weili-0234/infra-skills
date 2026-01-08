@@ -342,7 +342,7 @@ Examples:
 
     # Run estimation
     try:
-        reports, raw_reports = estimate_from_config(tf_config, estimator_args)
+        reports, raw_reports = estimate_from_config(tf_config, estimator_args, verbose=args.verbose)
     except Exception as e:
         print(f"Error during estimation: {e}")
         if args.verbose:
