@@ -18,8 +18,6 @@ Estimate directly from HuggingFace model paths:
 python scripts/estimate_from_hf.py deepseek-ai/DeepSeek-V3 \
     --tp 4 --pp 4 --ep 8 --num-gpus 128 --num-layers-in-last-pipeline-stage 16
 
-
-
 # Qwen 3
 python scripts/estimate_from_hf.py Qwen/Qwen3-235B-A22B \
     --tp 8 --pp 4 --ep 4 --num-gpus 128
