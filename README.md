@@ -65,7 +65,7 @@ Skill creation procedure:
 
 1. Git clone the latest repo
 2. Analyze `docs/en`, understand basic structure and write a doc navigation guide for user
-getting stated or finding docs for advanced usage
+getting started or finding docs for advanced usage
 3. Gather valuable examples from the docs and `examples` dir, write key ideas and script
 path down for quick reference
 4. Checkout some important source code, for example `slime/slime/utils/arguments.py` and
