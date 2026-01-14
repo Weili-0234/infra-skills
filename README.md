@@ -41,6 +41,37 @@ Estimate GPU memory usage for Megatron-based MoE and dense models. Built upon [m
 
 **Status:** ✅ Complete
 
+### SLIME User
+Guide for using SLIME (LLM post-training framework for RL Scaling). Built upon [THUDM/slime](https://github.com/THUDM/slime).
+
+**Capabilities:**
+- RL training setup and configuration (GRPO, GSPO, PPO, Reinforce++)
+- Multi-turn tool calling and agent workflows
+- Custom reward models and generation functions
+- Megatron and FSDP backend configuration
+- SGLang integration and optimization
+- Dynamic sampling and partial rollout
+- Multi-node distributed training
+
+**Status:** ✅ Complete
+
+Prompt to create this skill, with Sonnet 4.5:
+
+```
+Use skill-creator to create a skill called slime-user at this repo. slime is an LLM
+  post-training framework for RL Scaling. Its repo is https://github.com/THUDM/slime.
+
+  Skill creation procedure:
+
+  1. Git clone the latest repo
+  2. Analyze `docs/en`, understand basic structure and write a doc navigation guide for user
+  getting stated or finding docs for advanced usage
+  3. Gather valuable examples from the docs and `examples` dir, write key ideas and script
+  path down for quick reference
+  4. Checkout some important source code, for example `slime/slime/utils/arguments.py` and
+  `slime/rollout/sglang_rollout.py`, provide its path and functions for a quick find.
+```
+
 ## Planned Skills
 
 ### SGLang Developer
@@ -79,7 +110,9 @@ Ask Claude Code directly: "Help me install skills from https://github.com/yzlnew
 # Clone and copy to personal skills directory
 git clone https://github.com/yzlnew/infra-skills.git
 mkdir -p ~/.claude/skills
-cp -r infra-skills/tilelang-developer ~/.claude/skills/tilelang-developer
+cp -r infra-skills/tilelang-developer ~/.claude/skills/
+cp -r infra-skills/megatron-memory-estimator ~/.claude/skills/
+cp -r infra-skills/slime-user ~/.claude/skills/
 ```
 
 **Project-level (for repository collaborators):**
@@ -88,22 +121,49 @@ cp -r infra-skills/tilelang-developer ~/.claude/skills/tilelang-developer
 cd your-project
 git clone https://github.com/yzlnew/infra-skills.git .claude/skills-repo
 mkdir -p .claude/skills
-cp -r .claude/skills-repo/tilelang-developer .claude/skills/tilelang-developer
+cp -r .claude/skills-repo/tilelang-developer .claude/skills/
+cp -r .claude/skills-repo/megatron-memory-estimator .claude/skills/
+cp -r .claude/skills-repo/slime-user .claude/skills/
 ```
 
 Skills automatically activate when relevant tasks are detected.
 
-### Example
+### Examples
 
+**TileLang Kernel Development:**
 ```bash
-# User request in Claude Code:
+# User request:
 "Write a FP16 matrix multiplication kernel optimized for A100"
 
-# Claude automatically loads tilelang-developer skill and generates:
+# Claude loads tilelang-developer skill and generates:
 # - Complete TileLang kernel code
 # - Performance optimizations (swizzle, pipelining)
 # - Testing code
 # - Hardware-specific tuning recommendations
+```
+
+**Megatron Memory Estimation:**
+```bash
+# User request:
+"Estimate memory for DeepSeek-V3 with TP=8, PP=4, EP=8"
+
+# Claude loads megatron-memory-estimator skill and provides:
+# - Detailed memory breakdown (model, optimizer, activations)
+# - Comparison across different parallelism strategies
+# - Memory optimization recommendations
+# - Hardware configuration suggestions
+```
+
+**SLIME RL Training Setup:**
+```bash
+# User request:
+"Help me set up GRPO training for Qwen3-4B with multi-turn tool calling"
+
+# Claude loads slime-user skill and provides:
+# - Environment setup instructions
+# - Custom generation function for tool calling
+# - Training script configuration
+# - Multi-node scaling guidance
 ```
 
 ## Development
@@ -161,6 +221,7 @@ Open an issue with:
 
 - [x] TileLang developer skill
 - [x] Megatron memory estimator skill
+- [x] SLIME user skill
 - [ ] SGLang developer skill
 - [ ] vLLM developer skill
 - [ ] Automated testing pipeline
@@ -172,6 +233,7 @@ Open an issue with:
 - [Claude Agent Skills Documentation](https://docs.anthropic.com/en/docs/build-with-claude/agent-skills)
 - [skill-creator Guide](https://github.com/anthropics/claude-code)
 - [TileLang Repository](https://github.com/tile-ai/tilelang)
+- [SLIME Repository](https://github.com/THUDM/slime)
 
 ## License
 
