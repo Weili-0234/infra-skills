@@ -72,6 +72,18 @@ path down for quick reference
 `slime/rollout/sglang_rollout.py`, provide its path and functions for a quick find.
 ```
 
+### TikZ Flowchart
+Create professional flowcharts and architecture diagrams using LaTeX TikZ with standardized styles.
+
+**Capabilities:**
+- Professional flowcharts with Google Material-like color palette
+- Standardized node types (data, memory, operation, kernel boxes)
+- Architecture diagrams and process flows
+- Grouping and layout best practices
+- Clean orthogonal edges and relative positioning
+
+**Status:** ✅ Complete
+
 ## Planned Skills
 
 ### SGLang Developer
@@ -113,6 +125,7 @@ mkdir -p ~/.claude/skills
 cp -r infra-skills/tilelang-developer ~/.claude/skills/
 cp -r infra-skills/megatron-memory-estimator ~/.claude/skills/
 cp -r infra-skills/slime-user ~/.claude/skills/
+cp -r infra-skills/tikz-flowchart ~/.claude/skills/
 ```
 
 **Project-level (for repository collaborators):**
@@ -124,6 +137,7 @@ mkdir -p .claude/skills
 cp -r .claude/skills-repo/tilelang-developer .claude/skills/
 cp -r .claude/skills-repo/megatron-memory-estimator .claude/skills/
 cp -r .claude/skills-repo/slime-user .claude/skills/
+cp -r .claude/skills-repo/tikz-flowchart .claude/skills/
 ```
 
 Skills automatically activate when relevant tasks are detected.
@@ -164,6 +178,18 @@ Skills automatically activate when relevant tasks are detected.
 # - Custom generation function for tool calling
 # - Training script configuration
 # - Multi-node scaling guidance
+```
+
+**TikZ Flowchart Creation:**
+```bash
+# User request:
+"Create a flowchart showing the FlashAttention-2 algorithm flow"
+
+# Claude loads tikz-flowchart skill and generates:
+# - Professional LaTeX TikZ diagram with standardized colors
+# - Data nodes (green), operation nodes (blue), memory nodes (orange)
+# - Clean layout with orthogonal edges
+# - Grouped kernel phases with proper styling
 ```
 
 ## Development
@@ -222,6 +248,7 @@ Open an issue with:
 - [x] TileLang developer skill
 - [x] Megatron memory estimator skill
 - [x] SLIME user skill
+- [x] TikZ flowchart skill
 - [ ] SGLang developer skill
 - [ ] vLLM developer skill
 - [ ] Automated testing pipeline
